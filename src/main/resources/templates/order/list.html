@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="text/javascript" th:src="@{/js/jquery-3.6.1.js}"></script>
+    <title>Coffee Kubal</title>
+    <style>
+      * {
+        padding: 0px;
+        margin: 0px;
+        font-family: 'Ubuntu';
+      }
+
+      body {
+        background-color:#fff9b0;
+      }
+
+      header {
+        background-color:#3c2317;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: left;
+        height: 10vh;
+        box-shadow: 5px 5px 10px rgb(0,0,0,0.3);
+        overflow-x: auto;
+      }
+
+      header > a {
+        letter-spacing: 0.1vw;
+        color: white;
+        margin-left: 15px;
+        margin-right: 15px;
+        text-decoration: none;
+      }
+
+      main {
+        display:flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .form-class {
+        width: 600px;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      table {
+        border-collapse: separate;
+        border: solid black 2px;
+        border-radius: 12px;
+        margin-top: 20px;
+      }
+
+      th {
+        padding: 5px 8px;
+        border-left: solid black 1px;
+        border-bottom: solid black 1px;
+      }
+
+      td {
+        padding: 5px 8px;
+        border-left: solid black 1px;
+      }
+
+      th:first-child, td:nth-child(2) {
+        border-left: none;
+      }
+
+      .submit-class {
+        background-color:darkslategray;
+        color: whitesmoke;
+        padding: 8px 10px;
+        letter-spacing: .2px;
+        margin: auto;
+        margin-top: 15px;
+        box-shadow: 2px 2px 5px rgb(0,0,0,0.2);
+        border-radius: 10px;
+      }
+
+      .action {
+        background-color:#f0e161;
+        padding: 8px 10px;
+        letter-spacing: .2px;
+        margin: auto;
+        box-shadow: 2px 2px 5px rgb(0,0,0,0.2);
+        border-radius: 10px;
+      }
+
+      .modal {
+        display: none;
+        position: absolute;
+        z-index: 1;
+        padding-top: 50px;
+        padding-bottom: 50px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+      }
+
+      .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+      }
+
+      .customer-name-field {
+        width: 60%;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 5px 0px;
+        text-indent: 6px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+
+      .order-menu-field {
+        width: 30%;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 5px 0px;
+        text-indent: 6px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a th:href="@{/order/list}">Orders</a>&nbsp;|&nbsp;
+      <a th:href="@{/menu/list}">Menus</a>&nbsp;|&nbsp;
+      <a th:href="@{/transaction/list}">Transactions</a>&nbsp;|&nbsp;
+      <a href="" onclick="logout(); return false;">Logout</a>
+    </header>
+    <main>
+      <div class="form-class">
+        <h2>Order List</h2>
+        <table>
+          <thead>
+            <th>Customer Name</th>
+            <th>Ordered Date</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            <tr th:each="o : ${orders}">
+              <td th:text="${o.getOrderId()}" style="display:none;"></td>
+              <td th:text="${o.getCustomerName()}"></td>
+              <td th:text="${o.getDisplayedCreatedDate()}"></td>
+              <td>
+                <a th:href="@{/order/details/{id}(id=${o.getOrderId()})}"><button class="action">Details</button></a>
+                &ensp;
+                <button class="action">Update</button>
+                &ensp;
+                <button class="action" th:attr="onclick=|deleteOrder('${o.getOrderId()}')|">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <button class="submit-class" th:attr="onclick=|createNewOrder()|">Create New Order</button>
+        </p>
+      </div>
+      <!-- START new order details modal -->
+      <div id="modal" class="modal">
+        <div class="modal-content">
+          <p>Customer Name</p>
+          <input id="customerName" class="customer-name-field" type="text" placeholder="Enter Customer Name" style="margin-top:10px" />
+          <br><br>
+          <p>Order Menu</p>
+          <div id="orderMenu">
+            <select id="menuSelector0" class="order-menu-field">
+              <option th:each="menu : ${menus}" th:value="${menu.getId()}" th:text="${menu.getName()}"></option>
+            </select>
+            <input id="quantity0" class="order-menu-field" type="number" placeholder="Quantity" value="1" />
+            <input id="notes0" class="order-menu-field" type="text" placeholder="Notes" />
+          </div>
+          <p>
+            <button class="submit-class" th:attr="onclick=|addOrderMenu()|">Add</button>&nbsp;
+            <button class="submit-class" th:attr="onclick=|removeOrderMenu()|">Remove</button>&nbsp;
+            <button class="submit-class" th:attr="onclick=|submit()|">Submit</button>&nbsp;
+            <button class="submit-class" th:attr="onclick=|closeModal()|">Cancel</button>
+          </p>
+        </div>
+      </div>
+      <!-- END new order details modal -->
+    </main>
+  </body>
+</html>
+
+<script>
+  var orderMenuIndex = 1;
+
+  function deleteOrder(_orderId) {
+    var ok = confirm("Are you sure you want to delete this order?");
+    if(ok) {
+      var json = JSON.stringify({orderId: _orderId});
+      gahr("POST", "/api/order/delete", null, json, "application/json; charset=utf-8", "/order/list", "ORDER DELETE ERROR");
+    }
+  }
+
+  function createNewOrder() {
+    $("#modal").css('display', 'block');
+  }
+
+  function closeModal() {
+    $("#modal").css('display', 'none');
+    for(let i = orderMenuIndex; i > 0; i--) {
+      removeOrderMenu();
+    }
+    $("#customerName").val("");
+    $("#menuSelector0").prop('selectedIndex', 0);
+    $("#quantity0").val(1);
+    $("#notes0").val("");
+  }
+
+  function constructMenuDropdown(data) {
+    var retval = '';
+    for(let i = 0; i < data.length; i++) {
+      retval += '<option value="' + data[i].id + '">' + data[i].name + '</option>';
+    }
+    return retval;
+  }
+
+  function addOrderMenu() {
+    $.getJSON('/api/menu/dropdown').done(function(data) {
+      var _data = null;
+      _data = constructMenuDropdown(data);
+      $("#orderMenu").append('<select id="menuSelector' + orderMenuIndex + '" class="order-menu-field">' +
+                             _data +
+                             '</select>' +
+                             '<input id="quantity' + orderMenuIndex + '" class="order-menu-field" type="number" placeholder="Quantity" value="1" />' +
+                             '<input id="notes' + orderMenuIndex + '" class="order-menu-field" type="text" placeholder="Notes" />');
+      orderMenuIndex++;
+    });
+  }
+
+  function removeOrderMenu() {
+    if(orderMenuIndex > 1) {
+      $("#menuSelector" + (orderMenuIndex - 1)).remove();
+      $("#quantity" + (orderMenuIndex - 1)).remove();
+      $("#notes" + (orderMenuIndex - 1)).remove();
+      orderMenuIndex--;
+    }
+  }
+
+  function submit() {
+    var _orderDetails = [];
+    var _customerName = $("#customerName").val();
+    for(let i = 0; i < orderMenuIndex; i++) {
+      var _menuId = $('select[id=menuSelector' + i + '] option').filter(':selected').val();
+      var _quantity = $("#quantity" + i).val();
+      var _notes = $("#notes" + i).val();
+      var _orderMenu = {menuId: _menuId, quantity: _quantity, notes: _notes};
+      _orderDetails.push(_orderMenu);
+    }
+    var _json = JSON.stringify({customerName: _customerName, orderDetails: _orderDetails});
+    console.log(_json);
+    gahr("POST", "/api/order/create-details", null, _json, "application/json; charset=utf-8", "/order/list", "ORDER CREATE DETAILS ERROR");
+  }
+
+  function logout() {
+    var _headers = {'Authorization':'Basic ' + btoa("asd:asd")};
+    $.ajax({
+      type: "GET",
+      url: "/order/list",
+      headers: _headers,
+      success: function(response, status, xhr) {
+      },
+      error: function(response) {
+        window.location = "/order/list";
+      }
+    });
+  }
+
+  function gahr(_type, _url, _headers, _data, _contentType, _onSuccessUrl, _alertMessage) {
+    $.ajax({
+      type: _type,
+      url: _url,
+      headers: _headers,
+      data: _data,
+      contentType: _contentType,
+      success: function(response, status, xhr) {
+        if(xhr.status == 200) {
+          window.location = _onSuccessUrl;
+        }
+      },
+      error: function(response) {
+        alert(_alertMessage);
+      }
+    });
+  }
+</script>

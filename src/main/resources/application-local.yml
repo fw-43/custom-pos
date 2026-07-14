@@ -1,0 +1,24 @@
+spring:
+  #profiles:
+  #  active: local    # [prod | local]
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create    # [create | create-drop | update | validate | none]
+    show-sql: true
+    properties:
+      hibernate:
+        column_ordering_strategy: legacy
+  thymeleaf:
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+  resources:
+    static-locations: classpath:src/main/resources/static/
+    cache:
+      period: 0
+

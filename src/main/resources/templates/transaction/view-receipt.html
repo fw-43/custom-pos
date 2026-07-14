@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<!--suppress ALL -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+      * {
+        font-size: 14px;
+        font-family: 'Ubuntu';
+      }
+
+      td, th, tr, table {
+        border-top: 1px solid black;
+        border-collapse: collapse;
+      }
+
+      td.menu, th.menu {
+        width: 28mm;
+        max-width: 28mm;
+        word-wrap: break-word;
+        padding-left: 3mm;
+        padding-right: 3mm;
+      }
+
+      td.notes, th.notes {
+        width: 22mm;
+        max-width: 22mm;
+        word-wrap: break-word;
+        padding-left: 3mm;
+        padding-right: 3mm;
+      }
+
+      td.price, th.price {
+        width: 17mm;
+        max-width: 17mm;
+        padding-left: 3mm;
+        padding-right: 3mm;
+      }
+
+      td.quantity, th.quantity {
+        width: 8mm;
+        max-width: 8mm;
+        padding-left: 3mm;
+        padding-right: 3mm;
+      }
+
+      .centered {
+        margin-top: 0;
+        text-align: center;
+        align-content: center;
+      }
+
+      .ticket {
+        width: 75mm;
+        max-width: 75mm;
+      }
+
+      img {
+        max-width: inherit;
+        width: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ticket">
+      <img th:src="@{/images/coffee-1.jpg}" alt="Logo">
+      <p class="centered">
+        <b><span th:text="${companyName}"></span></b><br>
+        <span th:text="${companyAddress}"></span><br>
+        <span th:text="${companyCity}"></span><br>
+        <span th:text="${companyPhone}"></span>
+      </p>
+      <p>
+        Ordered at: <span th:text="${receiptContent.getOrderedDate()}"></span><br>
+        Paid at: <span th:text="${receiptContent.getTransactionDate()}"></span><br>
+        Cashier: <span th:text="${receiptContent.getCashierName()}"></span><br>
+        Customer: <span th:text="${receiptContent.getCustomerName()}"></span>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th class="menu">Menu</th>
+            <th class="notes">Notes</th>
+            <th class="price">Price</th>
+            <th class="quantity">Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="mo : ${receiptContent.getMenuOrdered()}">
+            <td class="menu" th:text="${mo.getMenuName()}"></td>
+            <td class="notes" th:text="${mo.getNotes}"></td>
+            <td class="price" th:text="${mo.getPriceString()}"></td>
+            <td class="quantity" th:text="${mo.getQuantity()}"></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <b>Total:</b> <span th:text="${receiptContent.getTotalPriceString()}"></span>
+      </p>
+      <p class="centered" style="margin-top: 20px;">
+        Thanks for the order!<br>
+        Eat . Share . Fun<br>
+      </p>
+    </div>
+  </body>
+</html>

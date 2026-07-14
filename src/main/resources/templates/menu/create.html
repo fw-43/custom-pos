@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="text/javascript" th:src="@{/js/jquery-3.6.1.js}"></script>
+    <title>Coffee Kubal</title>
+    <style>
+      * {
+        padding: 0px;
+        margin: 0px;
+        font-family: 'Ubuntu';
+      }
+
+      body {
+        background-color:#fff9b0;
+      }
+
+      header {
+        background-color:#3c2317;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: left;
+        height: 10vh;
+        box-shadow: 5px 5px 10px rgb(0,0,0,0.3);
+        overflow-x: auto;
+      }
+
+      header > a {
+        letter-spacing: 0.1vw;
+        color: white;
+        margin-left: 15px;
+        margin-right: 15px;
+        text-decoration: none;
+      }
+
+      main {
+        display:flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .form-class {
+        width: 450px;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .field-class {
+        width: 100%;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 5px 0px;
+        text-indent: 6px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+
+      .submit-class {
+        background-color:darkslategray;
+        color: whitesmoke;
+        padding: 8px 10px;
+        letter-spacing: .2px;
+        margin: auto;
+        box-shadow: 2px 2px 5px rgb(0,0,0,0.2);
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a th:href="@{/order/list}">Orders</a>&nbsp;|&nbsp;
+      <a th:href="@{/menu/list}">Menus</a>&nbsp;|&nbsp;
+      <a th:href="@{/transaction/list}">Transactions</a>&nbsp;|&nbsp;
+      <a href="" onclick="logout(); return false;">Logout</a>
+    </header>
+    <main>
+      <div class="form-class">
+        <h2>Add New Menu</h2><br><br>
+        <p>
+          Menu Name:
+          <input class="field-class" id="name" type="text" />
+        </p>
+        <p>
+          Price:
+          <input class="field-class" id="price" type="number" />
+        </p>
+        <p>
+          <button class="submit-class" th:attr="onclick=|addNewMenu()|">Create New Menu</button>
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
+
+<script>
+  function addNewMenu() {
+    var json = JSON.stringify({name: $("#name").val(), price: $("#price").val()});
+    gahr("POST", "/api/menu/create", null, json, "application/json; charset=utf-8", "/menu/list", "CREATE NEW MENU ERROR");
+  }
+
+  function logout() {
+    var _headers = {'Authorization':'Basic ' + btoa("asd:asd")};
+    $.ajax({
+      type: "GET",
+      url: "/order/list",
+      headers: _headers,
+      success: function(response, status, xhr) {
+      },
+      error: function(response) {
+        window.location = "/order/list";
+      }
+    });
+  }
+
+  function gahr(_type, _url, _headers, _data, _contentType, _onSuccessUrl, _alertMessage) {
+    $.ajax({
+      type: _type,
+      url: _url,
+      headers: _headers,
+      data: _data,
+      contentType: _contentType,
+      success: function(response, status, xhr) {
+        if(xhr.status == 200) {
+          window.location = _onSuccessUrl;
+        }
+      },
+      error: function(response) {
+        alert(_alertMessage);
+      }
+    });
+  }
+</script>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="text/javascript" th:src="@{/js/jquery-3.6.1.js}"></script>
+    <title>Coffee Kubal</title>
+    <style>
+      * {
+        padding: 0px;
+        margin: 0px;
+        font-family: 'Ubuntu';
+      }
+
+      body {
+        background-color:#fff9b0;
+      }
+
+      header {
+        background-color:#3c2317;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: left;
+        height: 10vh;
+        box-shadow: 5px 5px 10px rgb(0,0,0,0.3);
+        overflow-x: auto;
+      }
+
+      header > a {
+        letter-spacing: 0.1vw;
+        color: white;
+        margin-left: 15px;
+        margin-right: 15px;
+        text-decoration: none;
+      }
+
+      main {
+        display:flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .form-class {
+        width: 600px;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .adv-search-modal {
+        margin-top: 20px;
+        display: none;
+        border: black 1px dashed;
+        border-radius: 6px;
+        padding-left: 15px;
+        padding-top: 5px;
+      }
+
+      .field-class {
+        width: 40%;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 5px 0px;
+        text-indent: 6px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+
+      .year-field {
+        width: 15%;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 5px 0px;
+        text-indent: 6px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+
+      .month-field {
+        width: 20%;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 5px 0px;
+        text-indent: 6px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+
+      .date-field {
+        width: 20%;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 5px 0px;
+        text-indent: 6px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+
+      table {
+        border-collapse: separate;
+        border: solid black 2px;
+        border-radius: 12px;
+        margin-top: 20px;
+      }
+
+      th {
+        padding: 5px 8px;
+        border-left: solid black 1px;
+        border-bottom: solid black 1px;
+      }
+
+      td {
+        padding: 5px 8px;
+        border-left: solid black 1px;
+      }
+
+      th:first-child, td:nth-child(2) {
+        border-left: none;
+      }
+
+      .submit-class {
+        background-color:darkslategray;
+        color: whitesmoke;
+        padding: 8px 10px;
+        letter-spacing: .2px;
+        margin: auto;
+        margin-top: 10px;
+        box-shadow: 2px 2px 5px rgb(0,0,0,0.2);
+        border-radius: 10px;
+      }
+
+      .action {
+        background-color:#f0e161;
+        padding: 8px 10px;
+        letter-spacing: .2px;
+        margin: auto;
+        box-shadow: 2px 2px 5px rgb(0,0,0,0.2);
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a th:href="@{/order/list}">Orders</a>&nbsp;|&nbsp;
+      <a th:href="@{/menu/list}">Menus</a>&nbsp;|&nbsp;
+      <a th:href="@{/transaction/list}">Transactions</a>&nbsp;|&nbsp;
+      <a href="" onclick="logout(); return false;">Logout</a>
+    </header>
+    <main>
+      <div id="content" class="form-class">
+        <h2>Transaction List</h2>
+        <br>
+        <!-- START advanced search modal -->
+        <button class="submit-class" th:attr="onclick=|advSearch()|">Advanced Search</button>
+        <div id="adv-search-modal" class="adv-search-modal">
+          Customer Name: <input id="adv-search-customer-name" class="field-class" type="text" placeholder="Enter customer name" />
+          <br>
+          Date:&ensp;
+          <select id="yearSelector" class="year-field">
+            <option>2022</option>
+            <option>2023</option>
+            <option>2024</option>
+          </select>
+          <select id="monthSelector" class="month-field">
+            <option value="All months">All months</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+          <select id="dateSelector" class="date-field">
+            <option value="All dates">All dates</option>
+            <option value="1">01</option>
+            <option value="2">02</option>
+            <option value="3">03</option>
+            <option value="4">04</option>
+            <option value="5">05</option>
+            <option value="6">06</option>
+            <option value="7">07</option>
+            <option value="8">08</option>
+            <option value="9">09</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+            <option value="21">21</option>
+            <option value="22">22</option>
+            <option value="23">23</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+            <option value="31">31</option>
+          </select>
+          <br>
+          <button class="submit-class" th:attr="onclick=|submitAdvSearch()|">Search</button>
+          <br><br>
+        </div>
+        <!-- END advanced search modal -->
+        <p id="result-label" style="margin-top:20px;" th:if="${default == 'true'}" th:text="'Showing last ' + ${tlr.size} + ' transactions'"></p>
+        <p id="result-label" style="margin-top:20px;" th:unless="${default == 'true'}" th:text="${tlr.size} + ' results'"></p>
+        </p>
+        <table>
+          <thead>
+            <th>Customer Name</th>
+            <th>Transaction Date</th>
+            <th>Total Price</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            <tr th:each="t : ${tlr.getTransactions()}">
+              <td th:text="${t.getTransactionId()}" style="display:none;"></td>
+              <td th:text="${t.getCustomerName()}"></td>
+              <td th:text="${t.getDisplayedTransactionDate()}"></td>
+              <td th:text="${t.getTotalPriceString()}"></td>
+              <td>
+                <a th:href="@{/transaction/view-receipt/{id}(id=${t.getTransactionId()})}"><button class="action">View Receipt</button></a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <p><b>Total Revenue:</b>&nbsp;<span th:text="${tlr.displayedTotalRevenue}"></span></p>
+      </div>
+    </main>
+  </body>
+</html>
+
+<script>
+  var advSearchIsShown = false;
+
+  $(document).ready(function() {
+    var text = $("#result-label").text();
+    var url = window.location.href;
+    if($("#result-label").text().includes('last') == false) {
+      url = url.split('?')[1].split('&');
+      var customerName = decodeURI(url[0].split('=')[1]);
+      var year = url[1].split('=')[1];
+      var month = decodeURI(url[2].split('=')[1]);
+      var date = decodeURI(url[3].split('=')[1]);
+      var temp = ' for \'' +
+                 customerName + '\' & \'' +
+                 year + '\' & \'' +
+                 month + '\' & \'' +
+                 date + '\'';
+      $("#result-label").text(text.concat(temp));
+    }
+  });
+
+  function advSearch() {
+    if(advSearchIsShown) {
+      closeAdvSearch();
+    } else {
+      openAdvSearch();
+    }
+  }
+
+  function openAdvSearch() {
+    $("#adv-search-modal").css('display', 'block');
+    advSearchIsShown = true;
+  }
+
+  function closeAdvSearch() {
+    $("#adv-search-modal").css('display', 'none');
+    advSearchIsShown = false;
+    $("#adv-search-customer-name").val("");
+    $("#yearSelector").prop('selectedIndex', 0);
+    $("#monthSelector").prop('selectedIndex', 0);
+    $("#dateSelector").prop('selectedIndex', 0);
+  }
+
+  function submitAdvSearch() {
+    var _customerName = $("#adv-search-customer-name").val();
+    var _year = $('select[id=yearSelector] option').filter(':selected').text();
+    var _month = $('select[id=monthSelector] option').filter(':selected').val();
+    var _date = $('select[id=dateSelector] option').filter(':selected').val();
+    var url = "/transaction/filter?customerName=" + _customerName +
+              "&year=" + _year +
+              "&month=" + _month +
+              "&date=" + _date;
+    gahr("GET", url, null, null, "application/json; charset=utf-8", url, "TRANSACTION FILTER ERROR");
+  }
+
+  function logout() {
+    var _headers = {'Authorization':'Basic ' + btoa("asd:asd")};
+    $.ajax({
+      type: "GET",
+      url: "/order/list",
+      headers: _headers,
+      success: function(response, status, xhr) {
+      },
+      error: function(response) {
+        window.location = "/order/list";
+      }
+    });
+  }
+
+  function gahr(_type, _url, _headers, _data, _contentType, _onSuccessUrl, _alertMessage) {
+    $.ajax({
+      type: _type,
+      url: _url,
+      headers: _headers,
+      data: _data,
+      contentType: _contentType,
+      success: function(response, status, xhr) {
+        if(xhr.status == 200) {
+          window.location = _onSuccessUrl;
+        }
+      },
+      error: function(response) {
+        alert(_alertMessage);
+      }
+    });
+  }
+</script>

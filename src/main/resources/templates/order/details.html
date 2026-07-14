@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="text/javascript" th:src="@{/js/jquery-3.6.1.js}"></script>
+    <title>Coffee Kubal</title>
+    <style>
+      * {
+        padding: 0px;
+        margin: 0px;
+        font-family: 'Ubuntu';
+      }
+
+      body {
+        background-color:#fff9b0;
+      }
+
+      header {
+        background-color:#3c2317;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: left;
+        height: 10vh;
+        box-shadow: 5px 5px 10px rgb(0,0,0,0.3);
+        overflow-x: auto;
+      }
+
+      header > a {
+        letter-spacing: 0.1vw;
+        color: white;
+        margin-left: 15px;
+        margin-right: 15px;
+        text-decoration: none;
+      }
+
+      main {
+        display:flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .form-class {
+        width: 550px;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .order-info {
+        margin-top: 15px;
+      }
+
+      table {
+        border-collapse: separate;
+        border: solid black 2px;
+        border-radius: 12px;
+        margin-top: 20px;
+      }
+
+      th {
+        padding: 5px 8px;
+        border-left: solid black 1px;
+        border-bottom: solid black 1px;
+      }
+
+      td {
+        padding: 5px 8px;
+        border-left: solid black 1px;
+      }
+
+      th:first-child, td:nth-child(2) {
+        border-left: none;
+      }
+
+      .submit-class {
+        background-color:darkslategray;
+        color: whitesmoke;
+        padding: 8px 10px;
+        letter-spacing: .2px;
+        margin: auto;
+        box-shadow: 2px 2px 5px rgb(0,0,0,0.2);
+        border-radius: 10px;
+      }
+
+      .action {
+        background-color:#f0e161;
+        padding: 8px 10px;
+        letter-spacing: .2px;
+        margin: auto;
+        box-shadow: 2px 2px 5px rgb(0,0,0,0.2);
+        border-radius: 10px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+      }
+
+      .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a th:href="@{/order/list}">Orders</a>&nbsp;|&nbsp;
+      <a th:href="@{/menu/list}">Menus</a>&nbsp;|&nbsp;
+      <a th:href="@{/transaction/list}">Transactions</a>&nbsp;|&nbsp;
+      <a href="" onclick="logout(); return false;">Logout</a>
+    </header>
+    <main>
+      <div class="form-class">
+        <h2>Order Details</h2>
+        <br>
+        <p>
+          <p id="orderId" style="display:none;" th:text="${odr.getInfo().getOrderId()}"></p>
+          <p>Customer name: <span th:text="${odr.getInfo().getCustomerName()}"></span></p>
+          <p>Ordered date: <span th:text="${odr.getInfo().getCreatedDate()}"></span></p>
+        </p>
+        <br>
+        <p><b>Menu Ordered</b></p>
+        <table>
+          <thead>
+            <th>Menu Name</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Notes</th>
+            <th>Action</th>
+          </thead>
+          <tbody>
+            <tr th:each="mo : ${odr.getMenuOrdered()}">
+              <td th:text="${mo.getOrderMenuId()}" style="display:none;"></td>
+              <td th:text="${mo.getMenuName()}"></td>
+              <td th:text="${mo.getPriceString()}"></td>
+              <td th:text="${mo.getQuantity()}"></td>
+              <td th:text="${mo.getNotes()}"></td>
+              <td><button class="action" th:attr="onclick=|deleteOrderMenu('${mo.getOrderMenuId()}')|">Delete</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <p>
+          <b>Total price: </b><span th:text="${odr.getTotalPriceString()}"></span>
+        </p>
+        <br>
+        <p>
+          <a th:href="@{/order-menu/create/{id}(id=${odr.getInfo().getOrderId()})}"><button class="submit-class">Add Order Menu</button></a>
+          <button class="submit-class" th:attr="onclick=|openModal()|">Submit Payment</button>
+        </p>
+      </div>
+      <!-- payment modal -->
+      <div id="modal" class="modal">
+        <div class="modal-content">
+          <p>Payment:&emsp;<input id="payment" type="number" value="0" /></p><br>
+          <p>Total price: <input id="totalPrice" type="number" th:value="${odr.getTotalPrice()}" disabled /></p><br>
+          <p>Change:&emsp;<span id="change"></span></p>
+          <br>
+          <p>
+            <button class="submit-class" th:attr="onclick=|submitPayment()|">Submit</button>&nbsp;
+            <button class="submit-class" th:attr="onclick=|closeModal()|">Cancel</button>
+          </p>
+        </div>
+      </div>
+      <!---->
+    </main>
+  </body>
+</html>
+
+<script>
+  var formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'IDR'
+  });
+
+  function deleteOrderMenu(_id) {
+    var ok = confirm("Are you sure to delete this ordered item?");
+    if(ok) {
+      var orderId = $("#orderId").text();
+      gahr("POST", "/api/order-menu/delete", null, JSON.stringify({id: _id}), "application/json; charset=utf-8", "/order/details/" + orderId, "DELETE ERROR");
+    }
+  }
+
+  function openModal() {
+    $("#modal").css('display', 'block');
+  }
+
+  function closeModal() {
+    $("#modal").css('display', 'none');
+  }
+
+  $("#payment").on('keyup', function() {
+    var payment = $("#payment").val();
+    var totalPrice = $("#totalPrice").val();
+    console.log(totalPrice);
+    $("#change").text(formatter.format(payment - totalPrice));
+  });
+
+  function submitPayment() {
+    var _orderId = $("#orderId").text();
+    gahr("POST", "/api/transaction/submit-payment", null, JSON.stringify({orderId: _orderId}), "application/json; charset=utf-8", "/transaction/list", "SUBMIT PAYMENT ERROR");
+  }
+
+  function logout() {
+    var _headers = {'Authorization':'Basic ' + btoa("asd:asd")};
+    $.ajax({
+      type: "GET",
+      url: "/order/list",
+      headers: _headers,
+      success: function(response, status, xhr) {
+      },
+      error: function(response) {
+        window.location = "/order/list";
+      }
+    });
+  }
+
+  function gahr(_type, _url, _headers, _data, _contentType, _onSuccessUrl, _alertMessage) {
+    $.ajax({
+      type: _type,
+      url: _url,
+      headers: _headers,
+      data: _data,
+      contentType: _contentType,
+      success: function(response, status, xhr) {
+        if(xhr.status == 200) {
+          window.location = _onSuccessUrl;
+        }
+      },
+      error: function(response) {
+        alert(_alertMessage);
+      }
+    });
+  }
+</script>
